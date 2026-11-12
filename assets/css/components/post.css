@@ -392,10 +392,19 @@
 	align-items: center;
 }
 
+.mod-bar .select-wrap {
+	--select-h: 30px;
+}
+
 .mod-bar select {
 	height: 30px;
 	width: auto;
 	font-size: 13px;
+}
+
+.mod-bar .select-trigger {
+	font-size: 13px;
+	padding: 0 9px 0 10px;
 }
 
 .mod-bar .btn {

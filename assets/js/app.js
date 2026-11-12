@@ -307,6 +307,250 @@
 			}
 		});
 
+		/* ---------- Custom select (native <select> -> styled listbox) ---------- */
+		var openSelect = null;
+		var selectUid = 0;
+
+		function closeCustomSelect(instance, focusTrigger) {
+			if (!instance) return;
+			instance.wrap.classList.remove("open", "drop-up");
+			instance.trigger.setAttribute("aria-expanded", "false");
+			document.documentElement.classList.remove("select-sheet-open");
+			if (focusTrigger) instance.trigger.focus();
+			if (openSelect === instance) openSelect = null;
+		}
+
+		function enhanceSelect(select) {
+			var wrap = select.closest(".select-wrap");
+			if (!wrap || wrap.classList.contains("is-enhanced")) return;
+
+			var uid = ++selectUid;
+			var listId = "cs-list-" + uid;
+			var label = select.getAttribute("aria-label");
+			var labelEl = select.id ? document.querySelector('label[for="' + select.id + '"]') : null;
+
+			wrap.classList.add("is-enhanced");
+			select.classList.add("select-native");
+			select.tabIndex = -1;
+			select.setAttribute("aria-hidden", "true");
+
+			var oldIcon = wrap.querySelector("i[data-lucide], svg");
+			if (oldIcon) oldIcon.remove();
+
+			var trigger = document.createElement("button");
+			trigger.type = "button";
+			trigger.className = "select-trigger";
+			trigger.setAttribute("aria-haspopup", "listbox");
+			trigger.setAttribute("aria-expanded", "false");
+			trigger.setAttribute("aria-controls", listId);
+			if (label) trigger.setAttribute("aria-label", label);
+			if (labelEl) {
+				if (!labelEl.id) labelEl.id = "cs-label-" + uid;
+				trigger.setAttribute("aria-labelledby", labelEl.id);
+			}
+			if (select.disabled) trigger.disabled = true;
+
+			var valueEl = document.createElement("span");
+			valueEl.className = "select-value";
+			trigger.appendChild(valueEl);
+			var caret = document.createElement("i");
+			caret.setAttribute("data-lucide", "chevron-down");
+			caret.className = "select-caret";
+			trigger.appendChild(caret);
+
+			var backdrop = document.createElement("div");
+			backdrop.className = "select-backdrop";
+
+			var panel = document.createElement("div");
+			panel.className = "select-panel";
+
+			var sheetTitle = document.createElement("div");
+			sheetTitle.className = "select-sheet-title";
+			sheetTitle.textContent = label || (labelEl ? labelEl.textContent : "");
+			panel.appendChild(sheetTitle);
+
+			var list = document.createElement("ul");
+			list.className = "select-list";
+			list.id = listId;
+			list.setAttribute("role", "listbox");
+			list.tabIndex = -1;
+			if (label) list.setAttribute("aria-label", label);
+			panel.appendChild(list);
+
+			var items = [];
+			Array.prototype.forEach.call(select.options, function (opt, i) {
+				var li = document.createElement("li");
+				li.className = "select-option";
+				li.setAttribute("role", "option");
+				li.id = listId + "-" + i;
+				li.dataset.index = i;
+				if (opt.disabled) li.setAttribute("aria-disabled", "true");
+				var text = document.createElement("span");
+				text.className = "select-option-text";
+				text.textContent = opt.textContent;
+				var check = document.createElement("i");
+				check.setAttribute("data-lucide", "check");
+				check.className = "select-check";
+				li.appendChild(text);
+				li.appendChild(check);
+				list.appendChild(li);
+				items.push(li);
+			});
+
+			wrap.appendChild(trigger);
+			wrap.appendChild(backdrop);
+			wrap.appendChild(panel);
+
+			var instance = { wrap: wrap, trigger: trigger };
+			var active = -1;
+			var typed = "";
+			var typedTimer = null;
+
+			function sync() {
+				var idx = select.selectedIndex;
+				valueEl.textContent = idx >= 0 ? select.options[idx].textContent : "";
+				items.forEach(function (li, i) {
+					li.setAttribute("aria-selected", i === idx ? "true" : "false");
+				});
+			}
+
+			function setActive(i, scroll) {
+				if (i < 0 || i >= items.length) return;
+				if (active >= 0 && items[active]) items[active].classList.remove("active");
+				active = i;
+				items[i].classList.add("active");
+				list.setAttribute("aria-activedescendant", items[i].id);
+				if (scroll !== false) {
+					var top = items[i].offsetTop;
+					var bottom = top + items[i].offsetHeight;
+					if (top < list.scrollTop) list.scrollTop = top - 4;
+					else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight + 4;
+				}
+			}
+
+			function nextEnabled(from, dir) {
+				var i = from + dir;
+				while (i >= 0 && i < items.length) {
+					if (!select.options[i].disabled) return i;
+					i += dir;
+				}
+				return from;
+			}
+
+			function choose(i) {
+				if (i < 0 || i >= items.length || select.options[i].disabled) return;
+				var changed = select.selectedIndex !== i;
+				select.selectedIndex = i;
+				sync();
+				closeCustomSelect(instance, true);
+				if (changed) select.dispatchEvent(new Event("change", { bubbles: true }));
+			}
+
+			function open() {
+				if (select.disabled) return;
+				if (openSelect && openSelect !== instance) closeCustomSelect(openSelect);
+				wrap.classList.remove("drop-up");
+				wrap.classList.add("open");
+				trigger.setAttribute("aria-expanded", "true");
+				openSelect = instance;
+
+				var isSheet = window.matchMedia("(max-width: 640px)").matches;
+				if (isSheet) {
+					document.documentElement.classList.add("select-sheet-open");
+				} else {
+					var rect = trigger.getBoundingClientRect();
+					var need = Math.min(panel.offsetHeight, 280) + 12;
+					var below = window.innerHeight - rect.bottom;
+					if (below < need && rect.top > below) wrap.classList.add("drop-up");
+				}
+				setActive(select.selectedIndex >= 0 ? select.selectedIndex : 0);
+				list.focus({ preventScroll: true });
+			}
+
+			instance.open = open;
+
+			trigger.addEventListener("click", function () {
+				if (wrap.classList.contains("open")) closeCustomSelect(instance, true);
+				else open();
+			});
+
+			trigger.addEventListener("keydown", function (e) {
+				if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+					e.preventDefault();
+					open();
+				}
+			});
+
+			backdrop.addEventListener("click", function () {
+				closeCustomSelect(instance, true);
+			});
+
+			list.addEventListener("click", function (e) {
+				var li = e.target.closest(".select-option");
+				if (li) choose(parseInt(li.dataset.index, 10));
+			});
+
+			list.addEventListener("mousemove", function (e) {
+				var li = e.target.closest(".select-option");
+				if (li && !li.classList.contains("active")) setActive(parseInt(li.dataset.index, 10), false);
+			});
+
+			list.addEventListener("keydown", function (e) {
+				var k = e.key;
+				if (k === "ArrowDown") {
+					e.preventDefault();
+					setActive(nextEnabled(active, 1));
+				} else if (k === "ArrowUp") {
+					e.preventDefault();
+					setActive(nextEnabled(active, -1));
+				} else if (k === "Home") {
+					e.preventDefault();
+					setActive(nextEnabled(-1, 1));
+				} else if (k === "End") {
+					e.preventDefault();
+					setActive(nextEnabled(items.length, -1));
+				} else if (k === "Enter" || k === " ") {
+					e.preventDefault();
+					choose(active);
+				} else if (k === "Escape") {
+					e.preventDefault();
+					e.stopPropagation();
+					closeCustomSelect(instance, true);
+				} else if (k === "Tab") {
+					closeCustomSelect(instance);
+				} else if (k.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+					e.stopPropagation();
+					typed += k.toLowerCase();
+					clearTimeout(typedTimer);
+					typedTimer = setTimeout(function () {
+						typed = "";
+					}, 600);
+					for (var i = 0; i < items.length; i++) {
+						var idx = (active + 1 + i) % items.length;
+						if (!select.options[idx].disabled && select.options[idx].textContent.trim().toLowerCase().indexOf(typed) === 0) {
+							setActive(idx);
+							break;
+						}
+					}
+				}
+			});
+
+			select.addEventListener("change", sync);
+			var form = select.form;
+			if (form) form.addEventListener("reset", function () { setTimeout(sync, 0); });
+
+			sync();
+		}
+
+		document.querySelectorAll(".select-wrap select").forEach(enhanceSelect);
+
+		document.addEventListener("click", function (e) {
+			if (openSelect && !openSelect.wrap.contains(e.target)) closeCustomSelect(openSelect);
+		});
+		window.addEventListener("resize", function () {
+			if (openSelect) closeCustomSelect(openSelect);
+		});
+
 		/* ---------- Navigate on select change (CSP-safe) ---------- */
 		document.querySelectorAll("select[data-nav-select]").forEach(function (select) {
 			select.addEventListener("change", function () {

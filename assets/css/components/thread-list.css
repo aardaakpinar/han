@@ -353,7 +353,26 @@
 @media (max-width: 720px) {
 	.cat-list {
 		display: flex;
-		gap: 8px;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin: 0;
+	}
+	.cat-list li {
+		min-width: 0;
+		max-width: 100%;
+	}
+	.cat-list a {
+		border: 1px solid var(--border);
+		padding: 6px 10px;
+	}
+	.cat-list a span:first-child {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.thread-item {
+		padding: 12px;
 	}
 	.thread-head {
 		display: none;

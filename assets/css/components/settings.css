@@ -216,9 +216,10 @@
 
 /* ---- Panels ---- */
 .settings-panel {
-	overflow: hidden;
+	overflow: visible; /* custom select dropdown must not be clipped */
 }
 .settings-panel-head {
+	border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 	padding: 20px 24px 16px;
 	border-bottom: 1px solid var(--border);
 }
@@ -237,6 +238,7 @@
 	margin-bottom: 0;
 }
 .settings-panel-foot {
+	border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -323,6 +325,9 @@ input.input-sm {
 .select-sm {
 	width: 200px;
 	flex-shrink: 0;
+}
+.select-sm {
+	--select-h: 36px;
 }
 .select-sm select {
 	height: 36px;
