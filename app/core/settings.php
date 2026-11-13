@@ -19,7 +19,15 @@ const ACCENT_PRESETS = [
     'amber'   => 'Amber',
     'rose'    => 'Rose',
     'cyan'    => 'Cyan',
+    'custom'  => 'Custom',
 ];
+
+const THEME_OPTIONS   = ['system' => 'System', 'light' => 'Light', 'dark' => 'Dark'];
+const RADIUS_OPTIONS  = ['sharp' => 'Sharp', 'default' => 'Default', 'round' => 'Round'];
+const FONT_OPTIONS    = ['sans' => 'Inter', 'system' => 'System', 'serif' => 'Serif', 'mono' => 'Mono'];
+const WIDTH_OPTIONS   = ['narrow' => 'Narrow', 'default' => 'Default', 'wide' => 'Wide'];
+const SIDEBAR_OPTIONS = ['left' => 'Left', 'right' => 'Right', 'hidden' => 'Hidden'];
+const AVATAR_OPTIONS  = ['on' => 'Show', 'off' => 'Hide'];
 
 const SORT_LABELS = [
     'latest' => 'Latest activity',
@@ -56,14 +64,33 @@ function site_settings_schema(): array
         'appearance' => [
             'label' => 'Appearance',
             'icon' => 'palette',
-            'description' => 'Default look of the forum. Members can override colour, density and date style in their own settings.',
+            'description' => 'Default look of the forum. Members can override every option in their own settings.',
             'fields' => [
+                'theme' => ['type' => 'choice', 'label' => 'Theme', 'help' => 'System follows the visitor\'s device setting.', 'default' => 'system', 'options' => THEME_OPTIONS],
                 'accent' => ['type' => 'swatch', 'label' => 'Accent colour', 'help' => 'Used for buttons, links and highlights.', 'default' => 'zinc', 'options' => ACCENT_PRESETS],
+                'accent_custom' => ['type' => 'color', 'label' => 'Custom accent', 'help' => 'Used when Accent colour is set to Custom.', 'default' => '#6366f1'],
+                'radius' => ['type' => 'choice', 'label' => 'Corners', 'default' => 'default', 'options' => RADIUS_OPTIONS],
+                'font' => ['type' => 'choice', 'label' => 'Typeface', 'default' => 'sans', 'options' => FONT_OPTIONS],
+                'width' => ['type' => 'choice', 'label' => 'Page width', 'default' => 'default', 'options' => WIDTH_OPTIONS],
                 'density' => ['type' => 'choice', 'label' => 'Density', 'help' => 'Compact tightens spacing in lists and posts.', 'default' => 'comfortable', 'options' => ['comfortable' => 'Comfortable', 'compact' => 'Compact']],
+                'sidebar' => ['type' => 'choice', 'label' => 'Sidebar', 'help' => 'Where the categories and stats panel sits on the home page.', 'default' => 'left', 'options' => SIDEBAR_OPTIONS],
+                'avatars' => ['type' => 'choice', 'label' => 'Avatars in lists', 'default' => 'on', 'options' => AVATAR_OPTIONS],
                 'date_format' => ['type' => 'choice', 'label' => 'Date style', 'help' => 'Relative: "5m ago". Exact: "Oct 11, 2026 · 14:30".', 'default' => 'relative', 'options' => ['relative' => 'Relative', 'absolute' => 'Exact']],
+            ],
+        ],
+        'home' => [
+            'label' => 'Home page',
+            'icon' => 'layout-dashboard',
+            'description' => 'Choose which widgets appear on the home page and where. Members can rearrange them in their own settings.',
+            'fields' => [
                 'show_welcome_intro' => ['type' => 'bool', 'label' => 'Welcome banner for guests', 'help' => 'Show the intro card with sign-up buttons to logged-out visitors.', 'default' => true],
-                'show_categories_widget' => ['type' => 'bool', 'label' => 'Categories sidebar widget', 'default' => true],
-                'show_stats_widget' => ['type' => 'bool', 'label' => 'Forum stats sidebar widget', 'default' => true],
+                'home_widgets' => ['type' => 'widgets', 'label' => 'Widgets on desktop', 'help' => 'Pick a position for each widget and use the arrows to reorder.', 'default' => home_widgets_default()],
+                'home_widgets_mobile' => ['type' => 'widgets', 'mobile' => true, 'zones' => HOME_WIDGET_ZONES_MOBILE, 'label' => 'Widgets on mobile', 'help' => 'Phones have no sidebar, so widgets go above or below the threads. Order matters here: the list is shown top to bottom.', 'default' => '', 'inherit' => true, 'inherit_label' => 'Match the desktop layout'],
+                'widget_item_count' => ['type' => 'int', 'label' => 'Items per list widget', 'help' => 'Popular threads, recent replies and new members.', 'default' => 5, 'min' => 3, 'max' => 10],
+                'widget_about_title' => ['type' => 'text', 'label' => 'About widget title', 'default' => 'About', 'maxlen' => 40],
+                'widget_about_text' => ['type' => 'textarea', 'multiline' => true, 'label' => 'About widget text', 'help' => 'Plain text. Leave empty to hide the widget.', 'default' => '', 'maxlen' => 600, 'rows' => 4],
+                'widget_links_title' => ['type' => 'text', 'label' => 'Links widget title', 'default' => 'Links', 'maxlen' => 40],
+                'widget_links' => ['type' => 'textarea', 'multiline' => true, 'label' => 'Links widget items', 'help' => 'One per line: Label | https://example.com. Leave empty to hide the widget.', 'default' => '', 'maxlen' => 1000, 'rows' => 5],
             ],
         ],
         'content' => [
@@ -135,11 +162,27 @@ function user_settings_schema(): array
         'appearance' => [
             'label' => 'Appearance',
             'icon' => 'palette',
-            'description' => 'Choose how the forum looks for you. These settings apply only to your account.',
+            'description' => 'Make the forum yours. These settings apply only to your account.',
             'fields' => [
+                'theme' => ['type' => 'choice', 'label' => 'Theme', 'default' => '', 'options' => $inherit + THEME_OPTIONS],
                 'accent' => ['type' => 'swatch', 'label' => 'Accent colour', 'default' => '', 'options' => $inherit + ACCENT_PRESETS],
+                'accent_custom' => ['type' => 'color', 'label' => 'Custom accent', 'help' => 'Used when Accent colour is set to Custom.', 'default' => ''],
+                'radius' => ['type' => 'choice', 'label' => 'Corners', 'default' => '', 'options' => $inherit + RADIUS_OPTIONS],
+                'font' => ['type' => 'choice', 'label' => 'Typeface', 'default' => '', 'options' => $inherit + FONT_OPTIONS],
+                'width' => ['type' => 'choice', 'label' => 'Page width', 'default' => '', 'options' => $inherit + WIDTH_OPTIONS],
                 'density' => ['type' => 'choice', 'label' => 'Density', 'default' => '', 'options' => $inherit + ['comfortable' => 'Comfortable', 'compact' => 'Compact']],
+                'sidebar' => ['type' => 'choice', 'label' => 'Sidebar', 'default' => '', 'options' => $inherit + SIDEBAR_OPTIONS],
+                'avatars' => ['type' => 'choice', 'label' => 'Avatars in lists', 'default' => '', 'options' => $inherit + AVATAR_OPTIONS],
                 'date_format' => ['type' => 'choice', 'label' => 'Date style', 'default' => '', 'options' => $inherit + ['relative' => 'Relative', 'absolute' => 'Exact']],
+            ],
+        ],
+        'home' => [
+            'label' => 'Home page',
+            'icon' => 'layout-dashboard',
+            'description' => 'Arrange the home page widgets the way you like. This applies only to your account.',
+            'fields' => [
+                'home_widgets' => ['type' => 'widgets', 'label' => 'Widgets on desktop', 'help' => 'Pick a position for each widget and use the arrows to reorder.', 'default' => '', 'inherit' => true, 'inherit_label' => 'Use the site default layout'],
+                'home_widgets_mobile' => ['type' => 'widgets', 'mobile' => true, 'zones' => HOME_WIDGET_ZONES_MOBILE, 'label' => 'Widgets on mobile', 'help' => 'Phones have no sidebar, so widgets go above or below the threads. Order matters here: the list is shown top to bottom.', 'default' => '', 'inherit' => true, 'inherit_label' => 'Use the site default mobile layout'],
             ],
         ],
         'browsing' => [
@@ -214,6 +257,13 @@ function settings_cast(array $def, ?string $raw): bool|int|string
         case 'choice':
         case 'swatch':
             return array_key_exists($raw, $def['options']) ? $raw : $default;
+        case 'color':
+            return preg_match('/^#[0-9a-f]{6}$/i', $raw) ? strtolower($raw) : $default;
+        case 'widgets':
+            if ($raw === '' && !empty($def['inherit'])) {
+                return '';
+            }
+            return home_widgets_serialize(home_widgets_parse($raw, !empty($def['mobile'])));
         default:
             return $raw;
     }
@@ -258,6 +308,41 @@ function settings_collect(array $fields, array $input, array &$errors): array
                 $values[$key] = $raw;
                 break;
 
+            case 'widgets':
+                if (!empty($def['inherit']) && is_array($raw) && !empty($raw['inherit'])) {
+                    $values[$key] = '';
+                    break;
+                }
+                if (!is_array($raw) || !is_array($raw['order'] ?? null) || !is_array($raw['zone'] ?? null)) {
+                    $errors[] = $label . ': invalid layout.';
+                    break;
+                }
+                $registry = home_widget_registry();
+                $validZones = $def['zones'] ?? HOME_WIDGET_ZONES;
+                $isMobile = !empty($def['mobile']);
+                $list = [];
+                foreach ($raw['order'] as $wid) {
+                    if (!is_string($wid) || !isset($registry[$wid])) {
+                        continue;
+                    }
+                    $zone = $raw['zone'][$wid] ?? '';
+                    if (!is_string($zone) || !isset($validZones[$zone])) {
+                        $errors[] = $label . ': choose a valid position for every widget.';
+                        break 2;
+                    }
+                    $list[] = ['id' => $wid, 'zone' => $zone];
+                }
+                $values[$key] = home_widgets_serialize(home_widgets_parse(home_widgets_serialize($list), $isMobile));
+                break;
+
+            case 'color':
+                if (!is_string($raw) || !preg_match('/^#[0-9a-f]{6}$/i', trim($raw))) {
+                    $errors[] = $label . ' must be a valid colour.';
+                    break;
+                }
+                $values[$key] = strtolower(trim($raw));
+                break;
+
             default: // text, textarea
                 $text = is_string($raw) ? trim($raw) : '';
                 if (!empty($def['required']) && $text === '') {
@@ -273,7 +358,9 @@ function settings_collect(array $fields, array $input, array &$errors): array
                     break;
                 }
                 if ($def['type'] === 'textarea') {
-                    $text = preg_replace('/\s*[\r\n]+\s*/', ',', $text) ?? $text;
+                    $text = !empty($def['multiline'])
+                        ? str_replace("\r\n", "\n", $text)
+                        : (preg_replace('/\s*[\r\n]+\s*/', ',', $text) ?? $text);
                 }
                 $values[$key] = $text;
         }
@@ -382,6 +469,55 @@ function render_setting_field(string $key, array $def, bool|int|string $value, s
                 . '<span class="swatches" role="radiogroup" aria-labelledby="' . e($id) . '-label">' . $opts . '</span>'
                 . '</div>';
 
+        case 'widgets':
+            $inherit = !empty($def['inherit']);
+            $isInherit = $inherit && (string)$value === '';
+            $isMobile = !empty($def['mobile']);
+            $zonesDef = $def['zones'] ?? HOME_WIDGET_ZONES;
+            if ($isInherit) {
+                // Devralınan yerleşimi başlangıç olarak göster
+                $siteDesktop = home_widgets_parse((string)site_setting('home_widgets'));
+                if ($isMobile) {
+                    $siteMobile = (string)site_setting('home_widgets_mobile');
+                    $list = $ns === 'prefs' && $siteMobile !== ''
+                        ? home_widgets_parse($siteMobile, true)
+                        : home_widgets_mobile_from_desktop($siteDesktop);
+                } else {
+                    $list = $siteDesktop;
+                }
+            } else {
+                $list = home_widgets_parse((string)$value, $isMobile);
+            }
+            $registry = home_widget_registry();
+            $html = '<div class="setting-row stack widget-editor' . ($isInherit ? ' is-inherit' : '') . '" data-widget-editor>' . $text();
+            if ($inherit) {
+                $html .= '<label class="check-inline"><input type="checkbox" class="switch" name="' . e($name) . '[inherit]" value="1" data-widget-inherit' . ($isInherit ? ' checked' : '') . '> Use the site default layout</label>';
+            }
+            $html .= '<ul class="widget-rows">';
+            foreach ($list as $w) {
+                $meta = $registry[$w['id']];
+                $opts = '';
+                foreach ($zonesDef as $z => $zl) {
+                    $opts .= '<option value="' . e($z) . '"' . ($z === $w['zone'] ? ' selected' : '') . '>' . e($zl) . '</option>';
+                }
+                $html .= '<li class="widget-row" data-widget-row>'
+                    . '<input type="hidden" name="' . e($name) . '[order][]" value="' . e($w['id']) . '">'
+                    . '<span class="widget-row-icon"><i data-lucide="' . e($meta['icon']) . '"></i></span>'
+                    . '<span class="widget-row-text"><span class="setting-title">' . e($meta['label']) . '</span><span class="setting-help">' . e($meta['description']) . '</span></span>'
+                    . '<div class="select-wrap select-sm widget-zone"><select name="' . e($name) . '[zone][' . e($w['id']) . ']" aria-label="' . e($meta['label']) . ($isMobile ? ' position on mobile' : ' position') . '">' . $opts . '</select><i data-lucide="chevron-down"></i></div>'
+                    . '<span class="widget-row-move">'
+                    . '<button type="button" class="icon-btn" data-move="up" aria-label="Move ' . e($meta['label']) . ' up"><i data-lucide="chevron-up"></i></button>'
+                    . '<button type="button" class="icon-btn" data-move="down" aria-label="Move ' . e($meta['label']) . ' down"><i data-lucide="chevron-down"></i></button>'
+                    . '</span></li>';
+            }
+            return $html . '</ul></div>';
+
+        case 'color':
+            $hex = preg_match('/^#[0-9a-f]{6}$/i', (string)$value) ? (string)$value : '#6366f1';
+            return '<div class="setting-row">' . $text($id)
+                . '<input type="color" class="color-input" id="' . e($id) . '" name="' . e($name) . '" value="' . e($hex) . '">'
+                . '</div>';
+
         case 'textarea':
             return '<div class="setting-row stack">' . $text($id)
                 . '<textarea id="' . e($id) . '" name="' . e($name) . '" rows="' . (int)($def['rows'] ?? 3) . '" maxlength="' . (int)($def['maxlen'] ?? 500) . '">' . e((string)$value) . '</textarea>'
@@ -412,4 +548,33 @@ function render_setting_field(string $key, array $def, bool|int|string $value, s
                 . '<input type="text" id="' . e($id) . '" name="' . e($name) . '" value="' . e((string)$value) . '"' . (isset($def['maxlen']) ? ' maxlength="' . (int)$def['maxlen'] . '"' : '') . (!empty($def['required']) ? ' required' : '') . '>'
                 . '</div>';
     }
+}
+
+// ---------------------------------------------------------------------
+// Görünüm (tema) yardımcıları
+// ---------------------------------------------------------------------
+
+/** Geçerli özel vurgu rengi (#rrggbb). Kullanıcı "Custom" seçtiyse onun rengi, yoksa site rengi. */
+function effective_accent_custom(): string
+{
+    $user = current_user();
+    if ($user) {
+        $prefs = user_prefs_for((int)$user['id']);
+        if (($prefs['accent'] ?? '') === 'custom' && preg_match('/^#[0-9a-f]{6}$/i', (string)($prefs['accent_custom'] ?? ''))) {
+            return strtolower((string)$prefs['accent_custom']);
+        }
+    }
+    $site = (string)site_setting('accent_custom');
+    return preg_match('/^#[0-9a-f]{6}$/i', $site) ? strtolower($site) : '#6366f1';
+}
+
+/** <html> öğesi için data-* öznitelikleri (tema, vurgu, köşe, yazı tipi, genişlik...). */
+function appearance_attrs(): string
+{
+    $keys = ['theme', 'accent', 'radius', 'font', 'width', 'density', 'sidebar', 'avatars'];
+    $out = '';
+    foreach ($keys as $k) {
+        $out .= ' data-' . $k . '="' . e((string)effective_setting($k)) . '"';
+    }
+    return $out;
 }

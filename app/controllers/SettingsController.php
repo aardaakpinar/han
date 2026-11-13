@@ -143,6 +143,9 @@ final class SettingsController extends Controller
         } else {
             $hash = password_hash($newPassword, PASSWORD_DEFAULT);
             User::updatePassword((int)$user['id'], $hash);
+            // Parola değişince tüm kalıcı oturum anahtarlarını geçersiz kıl
+            RememberToken::deleteAllForUser((int)$user['id']);
+            remember_me_clear_cookie();
             session_regenerate_id(true);
             $success = 'Your password has been updated.';
         }
@@ -229,6 +232,7 @@ final class SettingsController extends Controller
         }
 
         User::delete((int)$user['id']);
+        remember_me_clear_cookie();
         $_SESSION = [];
         session_destroy();
         $this->redirect('/');

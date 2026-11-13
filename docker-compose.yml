@@ -1,6 +1,6 @@
 services:
     web:
-        image: aardaakpinar/php-forum:latest
+        image: aardaakpinar/han:latest
         build: .
         ports:
             - "8080:80"
@@ -12,7 +12,7 @@ services:
             DB_NAME: forum
             DB_USER: forum
             DB_PASS: ${DB_PASS:-str0ng-p4ssw@rd}
-            FORUM_NAME: ${FORUM_NAME:-Forum}
+            FORUM_NAME: ${FORUM_NAME:-han}
         depends_on:
             db:
                 condition: service_healthy

@@ -1,0 +1,286 @@
+/* ===== DROPDOWN ===== */
+
+.dropdown {
+	position: relative;
+	display: inline-flex;
+}
+
+.dropdown-panel {
+	display: none;
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	z-index: 1080;
+	min-width: 220px;
+	max-width: min(320px, calc(100vw - 32px));
+	padding: 6px;
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	background: var(--surface);
+	box-shadow: var(--shadow-pop);
+}
+
+.dropdown.drop-right .dropdown-panel {
+	right: 0;
+	left: auto;
+}
+
+.dropdown.open .dropdown-panel {
+	display: block;
+	animation: dropdown-pop 0.14s var(--ease);
+}
+
+@keyframes dropdown-pop {
+	from {
+		opacity: 0;
+		transform: translateY(-4px) scale(0.98);
+	}
+}
+
+.dropdown-item {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	width: 100%;
+	margin: 0;
+	padding: 8px 10px;
+	border: 0;
+	border-radius: var(--r-sm);
+	background: none;
+	color: var(--text-2);
+	font: inherit;
+	font-size: 0.9em;
+	line-height: 1.35;
+	text-align: left;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.dropdown-item:hover {
+	background: var(--hover);
+	color: var(--text);
+}
+
+.dropdown-item.active {
+	background: var(--pressed);
+	color: var(--text);
+	font-weight: 600;
+}
+
+.dropdown-item svg {
+	flex-shrink: 0;
+	width: 15px;
+	height: 15px;
+	color: var(--text-3);
+}
+
+.dropdown-item.active svg {
+	color: var(--accent);
+}
+
+.dropdown-item-label {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dropdown-item-count {
+	margin-left: auto;
+	color: var(--text-3);
+	font-size: 0.9em;
+	font-variant-numeric: tabular-nums;
+}
+
+.dropdown-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px 8px;
+	color: var(--text-3);
+	font-size: 0.78em;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.dropdown-head svg {
+	width: 14px;
+	height: 14px;
+}
+
+.dropdown-sep {
+	height: 1px;
+	margin: 6px 0;
+	background: var(--line);
+}
+
+.dropdown-form {
+	margin: 0;
+}
+
+.dropdown-field {
+	margin: 0;
+	padding: 6px 10px 10px;
+}
+
+.dropdown-field > label {
+	display: block;
+	margin-bottom: 6px;
+	color: var(--text-3);
+	font-size: 0.78em;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.dropdown-field .select-wrap {
+	--select-h: 34px;
+	width: 100%;
+}
+
+.dropdown-field .select-trigger {
+	font-size: 0.88em;
+}
+
+.dropdown-field .btn {
+	justify-content: center;
+	width: 100%;
+	margin-top: 8px;
+}
+
+/* Category picker (home filter chips) */
+.chip-dropdown {
+	border: 1px solid var(--line);
+	background: transparent;
+	font: inherit;
+	font-size: 0.85em;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.chip-dropdown:hover {
+	border-color: var(--line-strong);
+}
+
+.chip-dropdown.active {
+	border-color: var(--accent-line);
+	background: var(--accent-soft);
+	color: var(--text);
+}
+
+.chip-caret {
+	margin-left: -2px;
+	color: var(--text-3);
+}
+
+.cat-panel {
+	min-width: 230px;
+	max-height: min(60vh, 380px);
+	overflow-y: auto;
+}
+
+/* Moderation dropdown (thread page): same trigger/panel look as Sort threads */
+.mod-dropdown {
+	--select-h: 32px;
+}
+
+.mod-dropdown .select-trigger {
+	justify-content: flex-start;
+	gap: 7px;
+	width: auto;
+	padding: 0 10px;
+	font-size: 0.87em;
+	font-weight: 500;
+}
+
+.mod-dropdown .select-trigger > svg:first-child {
+	width: 15px;
+	height: 15px;
+	color: var(--text-2);
+}
+
+.mod-dropdown.open .select-caret {
+	transform: rotate(180deg);
+}
+
+.mod-dropdown .dropdown-panel {
+	top: calc(100% + 6px);
+	right: 0;
+	left: auto;
+	width: 260px;
+	max-width: calc(100vw - 32px);
+	padding: 5px;
+	border: 0;
+	border-radius: var(--r-lg);
+	box-shadow: var(--shadow-pop);
+}
+
+.mod-panel .dropdown-head {
+	padding: 6px 10px 8px;
+}
+
+.mod-panel .dropdown-field {
+	padding: 4px 5px 6px;
+}
+
+.mod-panel .dropdown-field .btn {
+	margin-top: 6px;
+}
+
+.mod-backdrop {
+	display: none;
+}
+
+@media (max-width: 640px) {
+	html.dropdown-sheet-open {
+		overflow: hidden;
+	}
+
+	.mod-dropdown.open .mod-backdrop {
+		display: block;
+		position: fixed;
+		inset: 0;
+		z-index: 1060;
+		background: rgb(0 0 0 / 0.55);
+		animation: select-fade 0.18s var(--ease);
+	}
+
+	.mod-dropdown .dropdown-panel {
+		position: fixed;
+		top: auto;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		width: auto;
+		min-width: 0;
+		max-width: none;
+		padding: 8px 10px calc(12px + env(safe-area-inset-bottom, 0px));
+		border-radius: 18px 18px 0 0;
+	}
+
+	.mod-dropdown.open .dropdown-panel {
+		animation: select-sheet 0.22s var(--ease);
+	}
+
+	.mod-panel .dropdown-head {
+		padding: 10px 10px 8px;
+	}
+
+	.mod-panel .dropdown-item {
+		min-height: 46px;
+		padding: 10px 12px;
+		font-size: 1em;
+	}
+
+	.mod-panel .dropdown-field {
+		padding: 4px 2px 4px;
+	}
+}
+
+@media (max-width: 640px) {
+	.dropdown-panel {
+		max-width: calc(100vw - 24px);
+	}
+}

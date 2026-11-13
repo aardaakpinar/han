@@ -30,6 +30,14 @@ final class AuthController extends Controller
 
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = (int)$user['id'];
+
+                if (!empty($_POST['remember'])) {
+                    remember_me_issue((int)$user['id']);
+                } else {
+                    // Bu tarayıcıda daha önce kalmış bir anahtar varsa temizle
+                    remember_me_forget();
+                }
+
                 $this->redirect('/');
             } else {
                 if ($user) {
@@ -116,6 +124,8 @@ final class AuthController extends Controller
 
     private function destroySession(): void
     {
+        remember_me_forget();
+
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();

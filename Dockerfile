@@ -1,9 +1,9 @@
 FROM php:8.5-apache-trixie
 
-LABEL org.opencontainers.image.title="PHP Forum System" \
+LABEL org.opencontainers.image.title="han Forum System" \
       org.opencontainers.image.description="A lightweight, modern, and security-hardened forum built with PHP & MariaDB" \
-      org.opencontainers.image.url="https://github.com/aardaakpinar/php-forum" \
-      org.opencontainers.image.source="https://github.com/aardaakpinar/php-forum" \
+      org.opencontainers.image.url="https://github.com/aardaakpinar/han" \
+      org.opencontainers.image.source="https://github.com/aardaakpinar/han" \
       org.opencontainers.image.licenses="MIT"
 
 # Sistem paketlerini güncelle (base image'dan sonra çıkan güvenlik yamaları),
@@ -20,7 +20,18 @@ RUN echo "apt refresh: ${REFRESH}" \
     && docker-php-ext-install pdo_mysql \
     && a2enmod rewrite headers \
     && sed -ri 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf \
+    && { \
+        echo 'ServerTokens Prod'; \
+        echo 'ServerSignature Off'; \
+        echo 'ServerName localhost'; \
+        echo 'TraceEnable Off'; \
+        echo 'Header always unset X-Powered-By'; \
+        echo 'Header unset X-Powered-By'; \
+    } > /etc/apache2/conf-available/zz-security-hardening.conf \
+    && a2enconf zz-security-hardening \
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && sed -ri 's/^expose_php[[:space:]]*=.*/expose_php = Off/' "$PHP_INI_DIR/php.ini" \
+    && ( grep -q '^expose_php' "$PHP_INI_DIR/php.ini" || echo 'expose_php = Off' >> "$PHP_INI_DIR/php.ini" ) \
     && apt-get purge -y --auto-remove $PHPIZE_DEPS \
     && pkgs="$(dpkg-query -W -f='${Package} ' libc6-dev libc-dev-bin linux-libc-dev 2>/dev/null || true)" \
     && if [ -n "$pkgs" ]; then apt-get purge -y --auto-remove $pkgs; fi \
@@ -54,6 +65,7 @@ RUN { \
 # seviyesinde de engelle (savunma katmanı).
 RUN { \
         echo '<Directory /var/www/html/assets/uploads>'; \
+        echo '    SetHandler none'; \
         echo '    <IfModule mod_php.c>'; \
         echo '        php_admin_flag engine off'; \
         echo '    </IfModule>'; \

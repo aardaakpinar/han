@@ -20,6 +20,10 @@
             <label for="password">Password</label>
             <input type="password" id="password" name="password" maxlength="200" required autocomplete="current-password">
         </div>
+        <label class="check-inline remember-row">
+            <input type="checkbox" class="switch" name="remember" value="1"<?= !empty($_POST['remember']) ? ' checked' : '' ?>>
+            <span>Remember me for 30 days</span>
+        </label>
         <button type="submit" class="btn btn-primary btn-block">Log in</button>
     </form>
     <?php if ($__canRegister): ?><p class="auth-alt">Don't have an account? <a href="<?= e(url('register')) ?>">Sign up</a></p><?php endif; ?>

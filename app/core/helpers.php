@@ -67,11 +67,135 @@ function current_user(): ?array
     $resolved = true;
 
     if (empty($_SESSION['user_id'])) {
-        return null;
+        $cached = remember_me_login();
+        return $cached;
     }
 
     $cached = User::findPublic((int)$_SESSION['user_id']);
     return $cached;
+}
+
+/* ---------- "Beni hatırla" (kalıcı oturum) ---------- */
+
+const REMEMBER_ME_COOKIE = 'FORUM_REMEMBER';
+const REMEMBER_ME_TTL = 2592000; // 30 gün
+
+function remember_me_https(): bool
+{
+    return request_is_https();
+}
+
+function remember_me_cookie_path(): string
+{
+    $base = app_base_path();
+    return $base === '' ? '/' : $base . '/';
+}
+
+function remember_me_set_cookie(string $value, int $expires): void
+{
+    if (headers_sent()) {
+        return;
+    }
+    setcookie(REMEMBER_ME_COOKIE, $value, [
+        'expires'  => $expires,
+        'path'     => remember_me_cookie_path(),
+        'secure'   => remember_me_https(),
+        'httponly' => true,
+        'samesite' => 'Strict',
+    ]);
+    $_COOKIE[REMEMBER_ME_COOKIE] = $value;
+}
+
+function remember_me_clear_cookie(): void
+{
+    if (headers_sent()) {
+        return;
+    }
+    setcookie(REMEMBER_ME_COOKIE, '', [
+        'expires'  => time() - 3600,
+        'path'     => remember_me_cookie_path(),
+        'secure'   => remember_me_https(),
+        'httponly' => true,
+        'samesite' => 'Strict',
+    ]);
+    unset($_COOKIE[REMEMBER_ME_COOKIE]);
+}
+
+function remember_me_cookie_value(): ?string
+{
+    $raw = $_COOKIE[REMEMBER_ME_COOKIE] ?? null;
+    return is_string($raw) && $raw !== '' ? $raw : null;
+}
+
+/** Giriş sırasında çağrılır: yeni anahtar üretir ve çerezi yazar. */
+function remember_me_issue(int $userId): void
+{
+    $token = RememberToken::create($userId, REMEMBER_ME_TTL);
+    remember_me_set_cookie(
+        $token['selector'] . ':' . $token['validator'],
+        time() + REMEMBER_ME_TTL
+    );
+}
+
+/** Çıkışta ve parola değişiminde çağrılır: bu tarayıcının anahtarını ve çerezini siler. */
+function remember_me_forget(): void
+{
+    if (($raw = remember_me_cookie_value()) !== null) {
+        $parts = explode(':', $raw, 2);
+        if (count($parts) === 2 && $parts[0] !== '') {
+            RememberToken::deleteBySelector($parts[0]);
+        }
+    }
+    remember_me_clear_cookie();
+}
+
+/**
+ * Geçerli bir "beni hatırla" çerezi varsa oturumu açar.
+ * Anahtar her kullanımda döndürülür (validator rotation).
+ */
+function remember_me_login(): ?array
+{
+    $raw = remember_me_cookie_value();
+    if ($raw === null) {
+        return null;
+    }
+
+    $parts = explode(':', $raw, 2);
+    if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
+        remember_me_clear_cookie();
+        return null;
+    }
+    [$selector, $validator] = $parts;
+
+    $row = RememberToken::find($selector);
+    $hash = hash('sha256', $validator);
+
+    if (!$row || (int)$row['expires_at'] < time() || !hash_equals((string)$row['validator_hash'], $hash)) {
+        // Anahtar geçersiz/süresi dolmuş; varsa kaydı da temizle.
+        if ($row) {
+            RememberToken::delete((int)$row['id']);
+        }
+        remember_me_clear_cookie();
+        return null;
+    }
+
+    $user = User::findPublic((int)$row['user_id']);
+    if (!$user) {
+        RememberToken::delete((int)$row['id']);
+        remember_me_clear_cookie();
+        return null;
+    }
+
+    // Tek kullanımlık rotation: eski anahtarı sil, yenisini yaz.
+    RememberToken::delete((int)$row['id']);
+    remember_me_issue((int)$user['id']);
+
+    if (!headers_sent()) {
+        session_regenerate_id(true);
+    }
+    $_SESSION['user_id'] = (int)$user['id'];
+
+    return $user;
 }
 
 function require_login(): array

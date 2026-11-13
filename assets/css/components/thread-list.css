@@ -1,25 +1,25 @@
-/* ===== THREAD LIST / HOME ===== */
+/* ===== HOME · THREAD LIST · SIDEBAR · SEARCH ===== */
 
 .intro {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 24px;
-	padding: 24px 28px;
-	margin-bottom: 28px;
-	background: linear-gradient(135deg, var(--surface) 0%, var(--surface-deep) 100%);
-	border: 1px solid var(--border);
-	border-radius: var(--radius-lg);
+	margin-bottom: 36px;
+	padding: 28px 30px;
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	background: var(--sunken);
 }
 
 .intro h1 {
-	font-size: 1.25rem;
 	margin-bottom: 4px;
+	font-size: 1.3rem;
 }
 
 .intro p {
 	margin: 0;
-	color: var(--muted);
+	color: var(--text-2);
 }
 
 .intro-actions {
@@ -28,50 +28,64 @@
 	flex-shrink: 0;
 }
 
+/* ---------- Thread table ---------- */
 .thread-table {
-	margin-top: 0;
+	--cols: 32px minmax(0, 1fr) 56px 56px 124px;
+}
+.thread-table.no-views {
+	--cols: 32px minmax(0, 1fr) 56px 124px;
+}
+:root[data-avatars="off"] .thread-table {
+	--cols: minmax(0, 1fr) 56px 56px 124px;
+}
+:root[data-avatars="off"] .thread-table.no-views {
+	--cols: minmax(0, 1fr) 56px 124px;
 }
 
 .thread-head,
 .thread-item {
 	display: grid;
-	grid-template-columns: 36px minmax(0, 1fr) 64px 64px 128px;
+	grid-template-columns: var(--cols);
 	align-items: center;
 	gap: 14px;
 }
 
 .thread-head {
-	padding: 10px 14px;
-	color: var(--muted);
-	font-size: 11.5px;
+	padding: 0 var(--pad) 8px;
+	color: var(--text-3);
+	font-size: 0.74em;
 	font-weight: 600;
+	letter-spacing: 0.08em;
 	text-transform: uppercase;
-	letter-spacing: 0.06em;
 }
 
-.thread-head span:nth-child(3),
-.thread-head span:nth-child(4) {
+.thread-head span:not(:first-child):not(:nth-child(2)):not(:last-child) {
 	text-align: center;
 }
 
-.thread-head span:nth-child(5) {
+.thread-head span:last-child {
 	text-align: right;
 }
 
+:root[data-avatars="off"] .thread-head span:first-child,
+:root[data-avatars="off"] .thread-avatar {
+	display: none;
+}
+
 .thread-list {
-	list-style: none;
 	margin: 0;
 	padding: 0;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: var(--radius-lg);
 	overflow: hidden;
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	background: var(--surface);
+	list-style: none;
 }
 
 .thread-item {
 	position: relative;
-	padding: 14px;
-	border-bottom: 1px solid var(--border);
+	padding: var(--row-y) var(--pad);
+	border-bottom: 1px solid var(--line);
 	transition: background 0.15s var(--ease);
 }
 
@@ -80,11 +94,11 @@
 }
 
 .thread-item:hover {
-	background: var(--surface2);
+	background: var(--hover);
 }
 
 .thread-item.pinned {
-	background: rgba(228, 228, 231, 0.025);
+	background: var(--sunken);
 }
 
 .thread-item.pinned::before {
@@ -94,7 +108,7 @@
 	top: 0;
 	bottom: 0;
 	width: 2px;
-	background: var(--accent2);
+	background: var(--accent);
 }
 
 .thread-main {
@@ -103,23 +117,18 @@
 
 .thread-title {
 	display: inline;
-	color: var(--accent);
-	font-size: 14.5px;
+	color: var(--text);
+	font-size: 1em;
 	font-weight: 500;
 	line-height: 1.4;
 	overflow-wrap: anywhere;
 }
 
 .thread-item.unread .thread-title {
-	color: var(--text);
 	font-weight: 600;
 }
 
-.thread-title:hover {
-	color: #fff;
-}
-
-/* Tüm satırı tıklanabilir yap */
+/* Whole row is clickable */
 .thread-title::after {
 	content: "";
 	position: absolute;
@@ -135,12 +144,12 @@
 	flex-wrap: wrap;
 	gap: 4px 8px;
 	margin-top: 5px;
-	color: var(--muted);
-	font-size: 12.5px;
+	color: var(--text-2);
+	font-size: 0.83em;
 }
 
 .thread-meta a:not(.cat-pill) {
-	color: var(--muted);
+	color: var(--text-2);
 }
 
 .thread-meta a:not(.cat-pill):hover {
@@ -153,17 +162,17 @@
 }
 
 .thread-stat {
-	text-align: center;
-	color: var(--muted);
-	font-size: 13px;
+	color: var(--text-2);
+	font-size: 0.87em;
 	font-variant-numeric: tabular-nums;
+	text-align: center;
 }
 
 .thread-stat strong {
 	display: block;
 	color: var(--text);
+	font-size: 1em;
 	font-weight: 600;
-	font-size: 14px;
 }
 
 .thread-stat.hot strong {
@@ -171,19 +180,19 @@
 }
 
 .thread-activity {
-	text-align: right;
-	font-size: 12.5px;
-	color: var(--muted);
-	line-height: 1.4;
 	min-width: 0;
+	color: var(--text-2);
+	font-size: 0.83em;
+	line-height: 1.4;
+	text-align: right;
 }
 
 .thread-activity a {
 	position: relative;
 	z-index: 2;
 	display: block;
-	color: var(--accent2);
 	overflow: hidden;
+	color: var(--text-3);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
@@ -199,7 +208,6 @@
 	margin-right: 7px;
 	border-radius: 50%;
 	background: var(--accent);
-	box-shadow: 0 0 0 3px var(--accent-glow);
 	vertical-align: 2px;
 }
 
@@ -207,40 +215,33 @@
 .lock-icon {
 	width: 13px;
 	height: 13px;
-	color: var(--muted);
-	vertical-align: -2px;
 	margin-right: 4px;
+	color: var(--text-3);
+	vertical-align: -2px;
 }
 
 .excerpt {
 	margin-top: 6px;
-	color: var(--muted);
-	font-size: 13px;
+	color: var(--text-2);
+	font-size: 0.87em;
 	line-height: 1.55;
 	overflow-wrap: anywhere;
 }
 
-/* Sidebar widgets */
-.widget {
-	padding: 16px;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: var(--radius-lg);
-}
-
+/* ---------- Sidebar ---------- */
 .widget-title {
 	margin: 0 0 10px;
-	color: var(--muted);
-	font-size: 11.5px;
+	color: var(--text-3);
+	font-size: 0.74em;
 	font-weight: 600;
+	letter-spacing: 0.08em;
 	text-transform: uppercase;
-	letter-spacing: 0.06em;
 }
 
 .cat-list {
-	list-style: none;
-	margin: 0 -6px;
+	margin: 0 -10px;
 	padding: 0;
+	list-style: none;
 }
 
 .cat-list a {
@@ -248,33 +249,33 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
-	padding: 7px 8px;
-	border-radius: var(--radius-sm);
-	color: var(--muted);
-	font-size: 13.5px;
+	padding: 7px 10px;
+	border-radius: var(--r-sm);
+	color: var(--text-2);
+	font-size: 0.93em;
 }
 
 .cat-list a:hover {
-	background: var(--surface2);
+	background: var(--hover);
 	color: var(--text);
 }
 
 .cat-list a.active {
-	background: var(--surface2);
+	background: var(--pressed);
 	color: var(--text);
 	font-weight: 500;
 }
 
 .cat-list .count {
-	font-size: 12px;
-	color: var(--muted);
+	color: var(--text-3);
+	font-size: 0.85em;
 	font-variant-numeric: tabular-nums;
 }
 
 .stat-list {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 14px 12px;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
 	margin: 0;
 }
 
@@ -283,13 +284,13 @@
 }
 
 .stat-list dt {
-	color: var(--muted);
-	font-size: 12px;
+	color: var(--text-3);
+	font-size: 0.78em;
 }
 
 .stat-list dd {
 	margin: 2px 0 0;
-	font-size: 1.2rem;
+	font-size: 1.1rem;
 	font-weight: 600;
 	letter-spacing: -0.02em;
 	font-variant-numeric: tabular-nums;
@@ -297,10 +298,8 @@
 
 .widget-note {
 	margin: 14px 0 0;
-	padding-top: 12px;
-	border-top: 1px solid var(--border);
-	color: var(--muted);
-	font-size: 12.5px;
+	color: var(--text-2);
+	font-size: 0.85em;
 }
 
 .widget-note a {
@@ -308,10 +307,115 @@
 	font-weight: 500;
 }
 
+.widget-note a:hover {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+/* ---------- Widgets (all zones) ---------- */
+.widget-list {
+	margin: 0 -10px;
+	padding: 0;
+	list-style: none;
+}
+
+.widget-link,
+.widget-member {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	min-width: 0;
+	padding: 7px 10px;
+	border-radius: var(--r-sm);
+	color: var(--text-2);
+	font-size: 0.93em;
+	line-height: 1.4;
+}
+
+.widget-link:hover,
+.widget-member:hover {
+	background: var(--hover);
+	color: var(--text);
+}
+
+.widget-link-title {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	color: var(--text);
+	overflow-wrap: anywhere;
+}
+
+.widget-link-meta {
+	overflow: hidden;
+	color: var(--text-3);
+	font-size: 0.85em;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.widget-link-plain {
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.widget-link-plain svg {
+	width: 13px;
+	height: 13px;
+	color: var(--text-3);
+}
+
+.widget-member {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 10px;
+}
+
+.widget-text {
+	margin: 0;
+	color: var(--text-2);
+	font-size: 0.93em;
+	line-height: 1.65;
+	overflow-wrap: anywhere;
+}
+
+/* Widgets placed above / below the thread list */
+.home-widgets {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+	gap: 16px;
+}
+
+.home-widgets-top {
+	margin-bottom: 32px;
+}
+
+.home-widgets-bottom {
+	margin-top: 40px;
+}
+
+.home-widgets .widget {
+	min-width: 0;
+	padding: var(--pad) var(--pad) calc(var(--pad) - 6px);
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	background: var(--surface);
+}
+
+.home-widgets .cat-list,
+.home-widgets .widget-list {
+	margin: 0 -8px;
+}
+
+/* ---------- Search ---------- */
 .result-meta {
-	margin: 20px 0 12px;
-	color: var(--muted);
-	font-size: 13.5px;
+	margin: 22px 0 12px;
+	color: var(--text-2);
+	font-size: 0.93em;
 }
 
 .result-meta strong {
@@ -333,53 +437,39 @@
 	position: absolute;
 	left: 13px;
 	top: 50%;
-	transform: translateY(-50%);
 	width: 16px;
 	height: 16px;
-	color: var(--muted);
+	color: var(--text-3);
+	transform: translateY(-50%);
 	pointer-events: none;
 }
 
 .search-form input {
 	height: 44px;
 	padding-left: 40px;
-	font-size: 15px;
+	font-size: 1em;
 }
 
 .search-form .btn {
 	height: 44px;
 }
 
+/* ---------- Responsive ---------- */
 @media (max-width: 720px) {
-	.cat-list {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 6px;
-		margin: 0;
+	.thread-table,
+	.thread-table.no-views {
+		--cols: 32px minmax(0, 1fr) auto;
 	}
-	.cat-list li {
-		min-width: 0;
-		max-width: 100%;
-	}
-	.cat-list a {
-		border: 1px solid var(--border);
-		padding: 6px 10px;
-	}
-	.cat-list a span:first-child {
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	.thread-item {
-		padding: 12px;
+	:root[data-avatars="off"] .thread-table,
+	:root[data-avatars="off"] .thread-table.no-views {
+		--cols: minmax(0, 1fr) auto;
 	}
 	.thread-head {
 		display: none;
 	}
 	.thread-item {
-		grid-template-columns: 36px minmax(0, 1fr) auto;
 		gap: 12px;
+		padding: var(--row-y) 12px;
 	}
 	.thread-item .thread-views,
 	.thread-item .thread-activity {
@@ -388,6 +478,6 @@
 	.intro {
 		flex-direction: column;
 		align-items: flex-start;
-		padding: 20px;
+		padding: 22px;
 	}
 }

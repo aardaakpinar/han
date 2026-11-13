@@ -43,6 +43,78 @@
 			}
 		});
 
+		/* ---------- Generic dropdowns ---------- */
+		var dropdowns = Array.prototype.slice.call(document.querySelectorAll("[data-dropdown]"));
+
+		function closeDropdown(dropdown) {
+			dropdown.classList.remove("open");
+			var toggle = dropdown.querySelector("[data-dropdown-toggle]");
+			if (toggle) toggle.setAttribute("aria-expanded", "false");
+			syncDropdownLock();
+		}
+
+		function closeDropdowns(except) {
+			dropdowns.forEach(function (dropdown) {
+				if (dropdown !== except) closeDropdown(dropdown);
+			});
+		}
+
+		/* Lock page scroll while the mobile moderation sheet is open */
+		function syncDropdownLock() {
+			var sheetOpen = !!document.querySelector(".mod-dropdown.open");
+			document.documentElement.classList.toggle("dropdown-sheet-open", sheetOpen);
+		}
+
+		dropdowns.forEach(function (dropdown) {
+			var toggle = dropdown.querySelector("[data-dropdown-toggle]");
+			if (!toggle) return;
+			toggle.addEventListener("click", function () {
+				var open = dropdown.classList.toggle("open");
+				toggle.setAttribute("aria-expanded", open ? "true" : "false");
+				if (open) closeDropdowns(dropdown);
+				syncDropdownLock();
+			});
+			dropdown.querySelectorAll("[data-dropdown-close]").forEach(function (el) {
+				el.addEventListener("click", function () {
+					closeDropdown(dropdown);
+				});
+			});
+		});
+
+		document.addEventListener("click", function (e) {
+			dropdowns.forEach(function (dropdown) {
+				if (dropdown.classList.contains("open") && !dropdown.contains(e.target)) closeDropdown(dropdown);
+			});
+		});
+
+		document.addEventListener("keydown", function (e) {
+			if (e.key === "Escape") closeDropdowns();
+		});
+
+		/* ---------- Mobile sidebar ---------- */
+		var sidebarToggle = document.querySelector("[data-sidebar-toggle]");
+		var sidebar = document.getElementById("home-sidebar");
+
+		function setSidebarOpen(open) {
+			document.documentElement.classList.toggle("sidebar-open", open);
+			if (!sidebarToggle) return;
+			sidebarToggle.setAttribute("aria-expanded", open ? "true" : "false");
+			sidebarToggle.setAttribute("aria-label", open ? "Close sidebar" : "Open sidebar");
+		}
+
+		if (sidebarToggle && sidebar) {
+			document.documentElement.classList.add("has-sidebar");
+			sidebarToggle.addEventListener("click", function () {
+				setSidebarOpen(!document.documentElement.classList.contains("sidebar-open"));
+			});
+			document.addEventListener("keydown", function (e) {
+				if (e.key === "Escape") setSidebarOpen(false);
+			});
+			window.addEventListener("resize", function () {
+				if (window.innerWidth > 920) setSidebarOpen(false);
+			});
+		}
+
 		/* ---------- Edit toggles ---------- */
 		document.querySelectorAll(".edit-toggle").forEach(function (button) {
 			button.addEventListener("click", function () {
@@ -303,6 +375,30 @@
 					try {
 						localStorage.setItem(key, "1");
 					} catch (err) {}
+				});
+			}
+		});
+
+		/* ---------- Home widget editor (reorder + inherit toggle) ---------- */
+		document.querySelectorAll("[data-widget-editor]").forEach(function (editor) {
+			var list = editor.querySelector(".widget-rows");
+			var inherit = editor.querySelector("[data-widget-inherit]");
+
+			editor.addEventListener("click", function (e) {
+				var btn = e.target.closest("[data-move]");
+				if (!btn || editor.classList.contains("is-inherit")) return;
+				var row = btn.closest("[data-widget-row]");
+				if (btn.dataset.move === "up" && row.previousElementSibling) {
+					list.insertBefore(row, row.previousElementSibling);
+				} else if (btn.dataset.move === "down" && row.nextElementSibling) {
+					list.insertBefore(row.nextElementSibling, row);
+				}
+				btn.focus();
+			});
+
+			if (inherit) {
+				inherit.addEventListener("change", function () {
+					editor.classList.toggle("is-inherit", inherit.checked);
 				});
 			}
 		});

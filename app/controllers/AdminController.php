@@ -107,7 +107,7 @@ final class AdminController extends Controller
         $uploadDir = BASE_DIR . '/assets/uploads';
 
         return [
-            'Forum version'    => 'v' . ltrim(APP_VERSION, 'v'),
+            'han version'      => 'v' . ltrim(APP_VERSION, 'v'),
             'Database schema'  => 'v' . forum_schema_version(Database::get()),
             'PHP'              => PHP_VERSION,
             'Database server'  => $dbVersion,

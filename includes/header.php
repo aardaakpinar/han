@@ -6,12 +6,13 @@ $__logo = (string)($__siteSettings['logo'] ?? '');
 $__favicon = (string)($__siteSettings['favicon'] ?? '');
 $__hideName = !empty($__siteSettings['hide_name_with_logo']) && $__logo !== '';
 $__accent = (string)effective_setting('accent');
-$__density = (string)effective_setting('density');
+$__accentCustom = $__accent === 'custom' ? effective_accent_custom() : '';
 $__canRegister = $__siteSettings['registration_open'] || User::countAll() === 0;
 $__isAdmin = $__user && ($__user['role'] ?? '') === 'admin';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logout') {
     verify_csrf();
+    remember_me_forget();
 
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
@@ -31,18 +32,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logou
 }
 ?>
 <!DOCTYPE html>
-<html lang="en" data-accent="<?= e($__accent) ?>" data-density="<?= e($__density) ?>">
+<html lang="en"<?= appearance_attrs() ?>>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#09090b">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)">
 <title><?= e($pageTitle ?? $__siteSettings['name']) ?></title>
 <link rel="preload" href="/assets/fonts/inter-Regular.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="/assets/css/main.css">
+<?php if ($__accentCustom !== ''): ?>
+<link rel="stylesheet" href="<?= e(url('theme.css')) ?>?a=<?= e(substr($__accentCustom, 1)) ?>">
+<?php endif; ?>
 <?php if ($__favicon !== ''): ?>
 <link rel="icon" href="<?= e(url($__favicon)) ?>">
+<?php else: ?>
+<link rel="icon" type="image/svg+xml" href="<?= e(url('assets/img/favicon.svg')) ?>">
 <?php endif; ?>
 </head>
 <body>
@@ -50,7 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logou
 <header class="site-header">
     <div class="header-inner">
         <a href="<?= e(url()) ?>" class="brand" aria-label="<?= e($__siteSettings['name']) ?> home">
-            <?php if ($__logo !== ''): ?><img src="<?= e(url($__logo)) ?>" alt="<?= e($__siteSettings['name']) ?>" class="brand-logo"><?php endif; ?>
+            <?php if ($__logo !== ''): ?>
+                <img src="<?= e(url($__logo)) ?>" alt="<?= e($__siteSettings['name']) ?>" class="brand-logo">
+            <?php else: ?>
+                <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+                    <path d="M10 25.5V6.5M10 15.5h6.5a5.5 5.5 0 0 1 5.5 5.5v4.5"
+                          stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            <?php endif; ?>
             <?php if (!$__hideName): ?>
                 <span class="wordmark"><?= e($__siteSettings['name']) ?></span>
             <?php endif; ?>
@@ -66,6 +80,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logou
             <a href="<?= e(url('search')) ?>" class="icon-btn mobile-search-link" aria-label="Search" title="Search">
                 <i data-lucide="search"></i>
             </a>
+            <button type="button" class="icon-btn mobile-sidebar-toggle" aria-label="Open sidebar" aria-expanded="false" aria-controls="home-sidebar" data-sidebar-toggle>
+                <i data-lucide="panel-left"></i>
+            </button>
             <?php if ($__user): ?>
                 <?php $__unread = Notification::unreadCount($__user); ?>
                 <div class="user-menu">

@@ -28,12 +28,51 @@ $pageQuery = $page > 1 ? '?page=' . (int)$page : '';
             <span><?= e($thread['title']) ?></span>
         </h1>
         <?php if ($user): ?>
-        <form method="post" action="<?= e(url('thread/' . (int)$id)) ?>" class="follow-form">
-            <?= csrf_field() ?>
-            <button type="submit" name="action" value="<?= $isFollowing ? 'unfollow' : 'follow' ?>" class="follow-btn<?= $isFollowing ? ' following' : '' ?>">
-                <i data-lucide="<?= $isFollowing ? 'bell-ring' : 'bell' ?>"></i><?= $isFollowing ? 'Following' : 'Follow' ?>
-            </button>
-        </form>
+        <div class="thread-actions">
+            <form method="post" action="<?= e(url('thread/' . (int)$id)) ?>" class="follow-form">
+                <?= csrf_field() ?>
+                <button type="submit" name="action" value="<?= $isFollowing ? 'unfollow' : 'follow' ?>" class="follow-btn<?= $isFollowing ? ' following' : '' ?>">
+                    <i data-lucide="<?= $isFollowing ? 'bell-ring' : 'bell' ?>"></i><?= $isFollowing ? 'Following' : 'Follow' ?>
+                </button>
+            </form>
+            <?php if ($isAdmin): ?>
+            <div class="dropdown mod-dropdown" data-dropdown>
+                <button type="button" class="select-trigger dropdown-toggle" aria-haspopup="true" aria-expanded="false" data-dropdown-toggle>
+                    <i data-lucide="shield"></i>Moderation<i data-lucide="chevron-down" class="select-caret"></i>
+                </button>
+                <div class="mod-backdrop" data-dropdown-close aria-hidden="true"></div>
+                <div class="dropdown-panel mod-panel" aria-label="Moderation">
+                    <div class="dropdown-head"><i data-lucide="shield"></i>Moderation</div>
+                    <form method="post" action="<?= e(url('thread/' . (int)$id)) ?>" class="dropdown-form">
+                        <?= csrf_field() ?>
+                        <button type="submit" name="action" value="pin" class="dropdown-item">
+                            <i data-lucide="<?= (int)$thread['pinned'] === 1 ? 'pin-off' : 'pin' ?>"></i>
+                            <span class="dropdown-item-label"><?= (int)$thread['pinned'] === 1 ? 'Unpin thread' : 'Pin thread' ?></span>
+                        </button>
+                        <button type="submit" name="action" value="lock" class="dropdown-item">
+                            <i data-lucide="<?= $isLocked ? 'lock-open' : 'lock' ?>"></i>
+                            <span class="dropdown-item-label"><?= $isLocked ? 'Unlock thread' : 'Lock thread' ?></span>
+                        </button>
+                    </form>
+                    <div class="dropdown-sep"></div>
+                    <form method="post" action="<?= e(url('thread/' . (int)$id)) ?>" class="dropdown-field">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="action" value="move">
+                        <label for="mod-move-category">Move to category</label>
+                        <div class="select-wrap">
+                            <select id="mod-move-category" name="category_id">
+                                <?php foreach ($categories as $c): ?>
+                                    <option value="<?= (int)$c['id'] ?>"<?= (int)$c['id'] === (int)$thread['category_id'] ? ' selected' : '' ?>><?= e($c['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <i data-lucide="chevron-down"></i>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm"><i data-lucide="arrow-right-left"></i>Move</button>
+                    </form>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
         <?php endif; ?>
     </div>
     <div class="thread-info">
@@ -45,30 +84,6 @@ $pageQuery = $page > 1 ? '?page=' . (int)$page : '';
         <?php if ($isLocked): ?><span class="badge badge-warn"><i data-lucide="lock"></i>Locked</span><?php endif; ?>
     </div>
 </div>
-
-<?php if ($isAdmin): ?>
-<div class="mod-bar">
-    <span class="mod-label"><i data-lucide="shield"></i>Moderation</span>
-    <form method="post" action="<?= e(url('thread/' . (int)$id)) ?>">
-        <?= csrf_field() ?>
-        <button type="submit" name="action" value="pin" class="btn btn-secondary btn-sm"><i data-lucide="<?= (int)$thread['pinned'] === 1 ? 'pin-off' : 'pin' ?>"></i><?= (int)$thread['pinned'] === 1 ? 'Unpin' : 'Pin' ?></button>
-        <button type="submit" name="action" value="lock" class="btn btn-secondary btn-sm"><i data-lucide="<?= $isLocked ? 'lock-open' : 'lock' ?>"></i><?= $isLocked ? 'Unlock' : 'Lock' ?></button>
-    </form>
-    <form method="post" action="<?= e(url('thread/' . (int)$id)) ?>">
-        <?= csrf_field() ?>
-        <input type="hidden" name="action" value="move">
-        <div class="select-wrap">
-            <select name="category_id" aria-label="Move to category">
-                <?php foreach ($categories as $c): ?>
-                    <option value="<?= (int)$c['id'] ?>"<?= (int)$c['id'] === (int)$thread['category_id'] ? ' selected' : '' ?>><?= e($c['name']) ?></option>
-                <?php endforeach; ?>
-            </select>
-            <i data-lucide="chevron-down"></i>
-        </div>
-        <button type="submit" class="btn btn-secondary btn-sm"><i data-lucide="arrow-right-left"></i>Move</button>
-    </form>
-</div>
-<?php endif; ?>
 
 <?php if ($page === 1): ?>
 <article class="post op" id="thread-body">

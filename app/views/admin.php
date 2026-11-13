@@ -1,5 +1,5 @@
 <?php $pageTitle = page_title('Admin'); $__nav = 'admin'; require __DIR__ . '/../../includes/header.php'; ?>
-<div class="page-header"><div><h1>Admin panel</h1><p class="lead">Manage your community.</p></div><span class="badge" title="Forum version">v<?= e(ltrim(APP_VERSION, 'v')) ?></span></div>
+<div class="page-header"><div><h1>Admin panel</h1><p class="lead">Manage your community.</p></div></div>
 
 <div class="tabs tabs-gap">
     <a class="tab<?= $tab === 'overview' ? ' active' : '' ?>" href="<?= e(url('admin')) ?>"><i data-lucide="layout-dashboard"></i>Overview</a>

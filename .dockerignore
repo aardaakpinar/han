@@ -4,11 +4,16 @@
 .dockerignore
 Dockerfile
 docker-compose*.yml
+docs/
+.idea/
+.vscode/
 assets/uploads/*
 !assets/uploads/.gitkeep
+!assets/uploads/.htaccess
 *.zip
 *.tar.gz
 *.md
+*.log
 LICENSE
 .env
 .env.*

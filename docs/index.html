@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#0b0b0c" />
+		<meta name="description" content="Han is a lightweight, self-hosted discussion forum for communities that value good conversations." />
+		<title>Han</title>
+		<link rel="icon" href="./assets/favicon.svg" />
+		<link rel="stylesheet" href="./assets/style.css" />
+	</head>
+	<body>
+		<header class="site-header">
+			<nav class="nav container" aria-label="Main navigation">
+				<a class="brand" href="#top" aria-label="Han home">
+					<img src="./assets/han-mark.svg" alt="han" />
+				</a>
+				<div class="nav-links">
+					<a class="nav-features" href="#features">Features</a>
+					<a class="nav-github" href="https://github.com/aardaakpinar/han">GitHub</a>
+					<a class="button button-secondary" href="#get-started">Get started</a>
+				</div>
+			</nav>
+		</header>
+
+		<main id="top">
+			<section class="hero container" aria-labelledby="hero-title">
+				<h1 id="hero-title">A home for <span>good conversations.</span></h1>
+				<p class="hero-copy">Han is a lightweight discussion forum that gives your community the tools to connect, share ideas, and keep conversations flowing.</p>
+				<div class="hero-actions">
+					<a class="button" href="https://github.com/aardaakpinar/han">Explore on GitHub <span aria-hidden="true">↗</span></a>
+					<a class="button button-secondary" href="https://hub.docker.com/r/aardaakpinar/han">Get the Docker image</a>
+				</div>
+				<p class="hero-note">Built with PHP 8.1+ and MySQL / MariaDB</p>
+
+				<div class="preview">
+					<img src="screenshots/home.png" alt="Han forum home with discussion categories and thread list" width="1448" height="808" />
+				</div>
+			</section>
+
+			<section class="section" id="features" aria-labelledby="features-title">
+				<div class="container">
+					<div class="section-heading">
+						<p class="section-kicker">Made for communities</p>
+						<h2 id="features-title">Everything a conversation needs.</h2>
+						<p>A focused forum experience with the everyday tools your community needs, without a pile of extra dependencies.</p>
+					</div>
+					<div class="feature-grid">
+						<article class="feature">
+							<div class="feature-icon" aria-hidden="true">↗</div>
+							<h3>Thoughtful discussions</h3>
+							<p>Organize conversations into categories, write with Markdown, and find threads with full-text search and useful filters.</p>
+						</article>
+						<article class="feature">
+							<div class="feature-icon" aria-hidden="true">◎</div>
+							<h3>Stay in the loop</h3>
+							<p>Follow threads, keep track of unread activity, and get notifications when a conversation moves forward.</p>
+						</article>
+						<article class="feature">
+							<div class="feature-icon" aria-hidden="true">⌘</div>
+							<h3>Simple to manage</h3>
+							<p>Use the built-in admin tools to manage members, categories, moderation, and community settings.</p>
+						</article>
+						<article class="feature">
+							<div class="feature-icon" aria-hidden="true">◇</div>
+							<h3>Your community, your server</h3>
+							<p>Self-host with Docker or a standard PHP setup. Your discussions stay on infrastructure you control.</p>
+						</article>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="get-started" aria-labelledby="start-title">
+				<div class="container">
+					<div class="get-started">
+						<div>
+							<p class="section-kicker">Get started</p>
+							<h2 id="start-title">Start your community with Han.</h2>
+							<p>Explore the setup guide, then launch locally with Docker Compose.</p>
+						</div>
+						<a class="button" href="https://github.com/aardaakpinar/han#installation--setup">Read the installation guide <span aria-hidden="true">↗</span></a>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<footer class="footer">
+			<div class="footer-inner container">
+				<span>© 2026 Han · Open source under the MIT License</span>
+				<div class="footer-links">
+					<a class="text-link" href="https://github.com/aardaakpinar/han">GitHub</a>
+					<a class="text-link" href="https://hub.docker.com/r/aardaakpinar/han">Docker Hub</a>
+				</div>
+			</div>
+		</footer>
+	</body>
+</html>

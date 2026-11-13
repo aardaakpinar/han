@@ -27,35 +27,25 @@ $link = static fn(array $over = []) => $baseUrl . ($qs($over) ? '?' . http_build
 </section>
 <?php endif; ?>
 
-<div class="layout">
-    <aside class="sidebar" aria-label="Sidebar">
-        <?php if (site_setting('show_categories_widget')): ?>
-        <div class="widget">
-            <h2 class="widget-title">Categories</h2>
-            <ul class="cat-list">
-                <li><a href="<?= e(url()) ?>" class="<?= !$category ? 'active' : '' ?>"><span>All threads</span><span class="count"><?= (int)$stats['threads'] ?></span></a></li>
-                <?php foreach ($categories as $c): ?>
-                    <li><a href="<?= e(url('category/' . $c['slug'])) ?>" class="<?= $category && (int)$category['id'] === (int)$c['id'] ? 'active' : '' ?>"><span><?= e($c['name']) ?></span><span class="count"><?= (int)$c['thread_count'] ?></span></a></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
+<?php
+$__widgets = home_widgets_html(['categories' => $categories, 'category' => $category, 'stats' => $stats]);
+$__catZone = home_widget_zone('categories');
+$__hasCategoryNav = $categories && $__catZone !== 'off';
+?>
+<div class="layout<?= $__widgets['sidebar'] === '' ? ' no-sidebar' : '' ?>">
+    <?php if ($__widgets['sidebar'] !== ''): ?>
+    <aside class="sidebar" id="home-sidebar" aria-label="Sidebar">
+        <?= $__widgets['sidebar'] ?>
+    </aside>
+    <?php endif; ?>
+    <div>
+        <?php if ($__widgets['top'] !== ''): ?>
+        <div class="home-widgets home-widgets-top only-desktop"><?= $__widgets['top'] ?></div>
+        <?php endif; ?>
+        <?php if ($__widgets['m_top'] !== ''): ?>
+        <div class="home-widgets home-widgets-top only-mobile"><?= $__widgets['m_top'] ?></div>
         <?php endif; ?>
 
-        <?php if (site_setting('show_stats_widget')): ?>
-        <div class="widget">
-            <h2 class="widget-title">Forum stats</h2>
-            <dl class="stat-list">
-                <div><dt>Threads</dt><dd><?= compact_number((int)$stats['threads']) ?></dd></div>
-                <div><dt>Replies</dt><dd><?= compact_number((int)$stats['posts']) ?></dd></div>
-                <div><dt>Members</dt><dd><?= compact_number((int)$stats['members']) ?></dd></div>
-            </dl>
-            <?php if (!empty($stats['newest'])): ?>
-                <p class="widget-note">Newest member: <a href="<?= e(url('profile/' . rawurlencode($stats['newest']['username']))) ?>"><?= e($stats['newest']['username']) ?></a></p>
-            <?php endif; ?>
-        </div>
-        <?php endif; ?>
-    </aside>
-    <div>
         <div class="page-header">
             <div class="page-header-title">
                 <h1><?= e($category ? $category['name'] : 'Threads') ?></h1>
@@ -87,6 +77,30 @@ $link = static fn(array $over = []) => $baseUrl . ($qs($over) ? '?' . http_build
             <a class="chip<?= $filter === '' ? ' active' : '' ?>" href="<?= e($link(['filter' => null, 'page' => null])) ?>">All</a>
             <?php if ($user): ?>
                 <a class="chip<?= $filter === 'following' ? ' active' : '' ?>" href="<?= e($link(['filter' => 'following', 'page' => null])) ?>"><i data-lucide="bell"></i>Following</a>
+            <?php endif; ?>
+            <?php if ($__hasCategoryNav): ?>
+            <div class="dropdown" data-dropdown>
+                <button type="button" class="chip chip-dropdown<?= $category ? ' active' : '' ?>" aria-haspopup="true" aria-expanded="false" data-dropdown-toggle>
+                    <i data-lucide="folder"></i>
+                    <span><?= e($category ? $category['name'] : 'Categories') ?></span>
+                    <i data-lucide="chevron-down" class="chip-caret"></i>
+                </button>
+                <div class="dropdown-panel cat-panel" aria-label="Categories">
+                    <a href="<?= e(url()) ?>" class="dropdown-item<?= !$category ? ' active' : '' ?>">
+                        <i data-lucide="layers"></i>
+                        <span class="dropdown-item-label">All categories</span>
+                    </a>
+                    <?php foreach ($categories as $c): ?>
+                        <a href="<?= e(url('category/' . $c['slug'])) ?>" class="dropdown-item<?= $category && (int)$category['id'] === (int)$c['id'] ? ' active' : '' ?>">
+                            <i data-lucide="folder"></i>
+                            <span class="dropdown-item-label"><?= e($c['name']) ?></span>
+                            <span class="dropdown-item-count"><?= (int)$c['thread_count'] ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            <?php if ($user): ?>
                 <a class="chip<?= $filter === 'mine' ? ' active' : '' ?>" href="<?= e($link(['filter' => 'mine', 'page' => null])) ?>"><i data-lucide="user"></i>My threads</a>
             <?php endif; ?>
             <a class="chip<?= $filter === 'unanswered' ? ' active' : '' ?>" href="<?= e($link(['filter' => 'unanswered', 'page' => null])) ?>"><i data-lucide="circle-help"></i>Unanswered</a>
@@ -102,6 +116,13 @@ $link = static fn(array $over = []) => $baseUrl . ($qs($over) ? '?' . http_build
         <?php else: ?>
             <?php require __DIR__ . '/partials/thread_rows.php'; ?>
             <?= pagination($page, $pages, $baseUrl, $qs()) ?>
+        <?php endif; ?>
+
+        <?php if ($__widgets['bottom'] !== ''): ?>
+        <div class="home-widgets home-widgets-bottom only-desktop"><?= $__widgets['bottom'] ?></div>
+        <?php endif; ?>
+        <?php if ($__widgets['m_bottom'] !== ''): ?>
+        <div class="home-widgets home-widgets-bottom only-mobile"><?= $__widgets['m_bottom'] ?></div>
         <?php endif; ?>
     </div>
 </div>

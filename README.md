@@ -1,10 +1,10 @@
 <div align="center">
 
-# PHP Forum System
+<img src="assets/img/han-logo.svg" alt="Han logo" height="80px">
 
-**A lightweight, modern, and security-hardened discussion platform built with native PHP 8.1+ and MySQL / MariaDB.**
+**Han** is a lightweight, modern, and security-hardened discussion platform built with native PHP 8.1+ and MySQL / MariaDB.
 
-[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-aardaakpinar%2Fphp--forum-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/aardaakpinar/php-forum)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-aardaakpinar%2Fhan-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/aardaakpinar/han)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D%208.1-777BB4?style=for-the-badge&logo=php&logoColor=white)](#requirements)
 [![Database](https://img.shields.io/badge/MySQL%20%2F%20MariaDB-00618A?style=for-the-badge&logo=mysql&logoColor=white)](#database--environment-variables)
 [![Architecture](https://img.shields.io/badge/Architecture-Custom%20MVC-f59e0b?style=for-the-badge)](#system-architecture)
@@ -32,7 +32,7 @@
 
 ## Overview
 
-**PHP Forum System** was initially engineered during an internship to explore deep practical implementations of modern PHP architecture, database scalability, and web application security standards.
+**Han** was initially engineered during an internship to explore deep practical implementations of modern PHP architecture, database scalability, and web application security standards.
 
 The project features a **custom lightweight MVC framework** written in vanilla PHP with zero bloated dependencies. It combines a modern, responsive dark UI with strict defensive programming practices to mitigate common web security vulnerabilities out of the box.
 
@@ -81,9 +81,6 @@ The project features a **custom lightweight MVC framework** written in vanilla P
 
 <img src="docs/screenshots/home.png" alt="Home page with thread list, category sidebar and forum stats" width="100%">
 
-<img src="docs/screenshots/thread.png" alt="Thread page with moderation toolbar and reply editor" height="380">
-<img src="docs/screenshots/profile-mobile.png" alt="Profile page on a mobile viewport" height="380">
-
 </div>
 
 ---
@@ -128,7 +125,7 @@ You don't need to clone the repository. Simply create a `docker-compose.yml` fil
 ```yaml
 services:
     web:
-        image: aardaakpinar/php-forum:latest
+        image: aardaakpinar/han:latest
         ports:
             - "8080:80"
         volumes:
@@ -176,8 +173,8 @@ docker compose up -d
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/aardaakpinar/php-forum.git
-    cd php-forum
+    git clone https://github.com/aardaakpinar/han.git
+    cd han
     ```
 2. **Start the containers:**
 
@@ -203,8 +200,8 @@ docker compose down
 1. **Clone or move the project into your web server directory:**
 
     ```bash
-    git clone https://github.com/aardaakpinar/php-forum.git /var/www/html/php-forum
-    cd /var/www/html/php-forum
+    git clone https://github.com/aardaakpinar/han.git /var/www/html/han
+    cd /var/www/html/han
     ```
 
 2. **Create the MySQL database and user:**
@@ -239,15 +236,20 @@ docker compose down
 
 The application reads its configuration from system environment variables in `config.php`. If variables are omitted, secure local defaults are applied:
 
-| Variable        | Description                  | Default Value                      | Example              |
-| :-------------- | :--------------------------- | :--------------------------------- | :------------------- |
-| `DB_HOST`       | Database host address        | `127.0.0.1`                        | `localhost` or `db`  |
-| `DB_PORT`       | Database server port         | `3306`                             | `3306`               |
-| `DB_NAME`       | Database name                | `forum`                            | `forum_production`   |
-| `DB_USER`       | Database username            | `forum`                            | `db_user`            |
-| `DB_PASS`       | Database password            | `str0ng-p4ssw@rd`                  | `SecretP@ssw0rd!`    |
-| `FORUM_NAME`    | Display name of the forum    | `Forum`                            | `DevCommunity`       |
-| `FORUM_TAGLINE` | Subtitle displayed in header | `A community for open discussion.` | `Code, Learn, Share` |
+| Variable        | Description                                                | Default Value                      | Example              |
+| :-------------- | :--------------------------------------------------------- | :--------------------------------- | :------------------- |
+| `DB_HOST`       | Database host address                                      | `127.0.0.1`                        | `localhost` or `db`  |
+| `DB_PORT`       | Database server port                                       | `3306`                             | `3306`               |
+| `DB_NAME`       | Database name                                              | `forum`                            | `forum_production`   |
+| `DB_USER`       | Database username                                          | `forum`                            | `db_user`            |
+| `DB_PASS`       | Database password                                          | `str0ng-p4ssw@rd`                  | `SecretP@ssw0rd!`    |
+| `FORUM_NAME`    | Display name of the forum                                  | `Han`                              | `DevCommunity`       |
+| `FORUM_TAGLINE` | Subtitle displayed in header                               | `A community for open discussion.` | `Code, Learn, Share` |
+| `TRUST_PROXY`   | Trust `X-Forwarded-Proto` from a reverse proxy (`1` / `0`) | `0`                                | `1`                  |
+| `FORCE_HTTPS`   | Treat every request as HTTPS (`1` / `0`)                   | `0`                                | `1`                  |
+
+> [!IMPORTANT]
+> `TRUST_PROXY` yalnızca uygulama doğrudan internete açık değilse ve istekler güvenilen bir ters proxy'den geliyorsa etkinleştirilmelidir. TLS'i proxy sonlandırıyorsa `TRUST_PROXY=1`, proxy yok ama HTTPS zorunluysa `FORCE_HTTPS=1` kullanın. Bu ayarlar `Secure` oturum çerezlerini ve HSTS başlığını etkinleştirir.
 
 ---
 

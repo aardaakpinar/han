@@ -7,7 +7,7 @@ ini_set('log_errors', '1');
 error_reporting(E_ALL);
 
 // ---- Uygulama ----
-define('APP_NAME', getenv('FORUM_NAME') ?: 'Forum');
+define('APP_NAME', getenv('FORUM_NAME') ?: 'han');
 define('APP_TAGLINE', getenv('FORUM_TAGLINE') ?: 'A community for open discussion.');
 
 // ---- Yollar ----
@@ -26,9 +26,37 @@ define('DB_NAME', getenv('DB_NAME') ?: 'forum');
 define('DB_USER', getenv('DB_USER') ?: 'forum');
 define('DB_PASS', getenv('DB_PASS') ?: 'str0ng-p4ssw@rd');
 
+// ---- HTTPS algılama ----
+// Ters proxy (Nginx, Cloudflare, ALB, vb.) arkasında TLS sonlandırılıyorsa
+// TRUST_PROXY=1 ayarlayın; proxy olmadan HTTPS zorlamak için FORCE_HTTPS=1.
+// TRUST_PROXY yalnızca isteğin güvenilen bir proxy'den geldiği kurulumlarda açılmalıdır.
+function request_is_https(): bool
+{
+    static $result = null;
+    if ($result !== null) {
+        return $result;
+    }
+
+    if (filter_var(getenv('FORCE_HTTPS') ?: '0', FILTER_VALIDATE_BOOLEAN)) {
+        return $result = true;
+    }
+
+    if (filter_var(getenv('TRUST_PROXY') ?: '0', FILTER_VALIDATE_BOOLEAN)) {
+        $forwarded = (string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '');
+        $proto = strtolower(trim(explode(',', $forwarded)[0]));
+        if ($proto === 'https') {
+            return $result = true;
+        }
+    }
+
+    return $result = (
+        (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['SERVER_PORT'] ?? '') === '443')
+    );
+}
+
 // ---- Güvenli session ayarları (session_start()'tan ÖNCE ayarlanmalı) ----
-$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-    || (($_SERVER['SERVER_PORT'] ?? '') === '443');
+$isHttps = request_is_https();
 
 ini_set('session.use_strict_mode', '1');   // sunucunun üretmediği session id kabul edilmez
 ini_set('session.use_only_cookies', '1');  // session id URL'de taşınamaz
@@ -110,6 +138,7 @@ Database::set($pdo);
 
 require __DIR__ . '/app/core/helpers.php';
 require __DIR__ . '/app/core/settings.php';
+require __DIR__ . '/app/core/widgets.php';
 require __DIR__ . '/app/core/Controller.php';
 
 foreach (glob(__DIR__ . '/app/models/*.php') as $__modelFile) {

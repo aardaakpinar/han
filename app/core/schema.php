@@ -9,7 +9,7 @@ declare(strict_types=1);
  *   yalnızca gerektiğinde çalışır, her istekte ALTER denenmez).
  */
 
-const FORUM_SCHEMA_VERSION = 4;
+const FORUM_SCHEMA_VERSION = 7;
 
 function ensure_column(PDO $pdo, string $table, string $column, string $definition): void
 {
@@ -174,7 +174,7 @@ function forum_migrate(PDO $pdo): void
     CREATE TABLE IF NOT EXISTS user_prefs (
         user_id INT UNSIGNED NOT NULL,
         pref_key VARCHAR(48) NOT NULL,
-        pref_value VARCHAR(64) NOT NULL,
+        pref_value VARCHAR(255) NOT NULL,
         PRIMARY KEY (user_id, pref_key),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) $opts");
@@ -207,6 +207,27 @@ function forum_migrate(PDO $pdo): void
         $upd = $pdo->prepare('UPDATE threads SET category_id = ? WHERE category_id IS NULL');
         $upd->execute([(int)$generalId]);
     }
+
+    // ---- v5: daha uzun kullanıcı tercihi değerleri (ana sayfa widget yerleşimi) ----
+    $pdo->exec('ALTER TABLE user_prefs MODIFY pref_value VARCHAR(255) NOT NULL');
+
+    // ---- v6: "beni hatırla" kalıcı oturum anahtarları ----
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS remember_tokens (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        user_id INT UNSIGNED NOT NULL,
+        selector CHAR(24) NOT NULL UNIQUE,
+        validator_hash CHAR(64) NOT NULL,
+        created_at INT NOT NULL,
+        expires_at INT NOT NULL,
+        KEY idx_remember_user (user_id),
+        KEY idx_remember_expires (expires_at),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) $opts");
+
+    // ---- v7: marka adı varsayılanı "han" ----
+    // Yalnızca eski varsayılan ad ("Forum") korunmuşsa güncelle; özel adlara dokunma.
+    $pdo->exec("UPDATE site_settings SET setting_value = 'han' WHERE setting_key = 'name' AND setting_value = 'Forum'");
 
     // ---- sürüm kaydı ----
     $pdo->exec("
