@@ -2,7 +2,7 @@
 
 <img src="assets/img/han-logo.svg" alt="Han logo" height="80px">
 
-**Han** is a lightweight, modern, and security-hardened discussion platform built with native PHP 8.1+ and MySQL / MariaDB.
+**Han** is a secure and modern PHP-based community and discussion platform.
 
 [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-aardaakpinar%2Fhan-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/aardaakpinar/han)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D%208.1-777BB4?style=for-the-badge&logo=php&logoColor=white)](#requirements)
