@@ -79,7 +79,10 @@ The project features a **custom lightweight MVC framework** written in vanilla P
 
 <div align="center">
 
-<img src="docs/screenshots/home.png" alt="Home page with thread list, category sidebar and forum stats" width="100%">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/home-dark.png">
+  <img src="docs/screenshots/home-light.png" alt="Home page with thread list, category sidebar and forum stats" width="100%">
+</picture>
 
 </div>
 
